@@ -1,0 +1,77 @@
+pipeline:
+  delegateSelectors:
+  - demo
+  identifier: demo
+  name: demo
+  orgIdentifier: default
+  projectIdentifier: default_project
+  stages:
+  - stage:
+      description: ''
+      identifier: CI_stage
+      name: Build
+      spec:
+        cloneCodebase: false
+        execution:
+          steps:
+          - step:
+              identifier: GitClone1
+              name: GitClone-1
+              spec:
+                build:
+                  spec:
+                    branch: main
+                  type: branch
+                connectorRef: gitconnect
+                repoName: helwrld
+              type: GitClone
+          - step:
+              identifier: Compile2
+              name: Compile-2
+              spec:
+                command: |-
+                  cd helwrld
+                  javac helwrld.java
+                  jar cvf myHelloWorld.jar *.class
+                  ls
+                shell: Bash
+              type: Run
+          - step:
+              identifier: PushtoGCSRepository3
+              name: Push to GCS Repository-3
+              spec:
+                archiveFormat: Tar
+                bucket: apprepository
+                connectorRef: demo
+                key: java
+                sourcePaths:
+                - helwrld/myHelloWorld.jar
+              type: SaveCacheGCS
+        platform:
+          arch: Amd64
+          os: Linux
+        runtime:
+          spec: {}
+          type: Cloud
+      tags: {}
+      type: CI
+  - stage:
+      description: ''
+      identifier: Custom_stage
+      name: Notification
+      spec:
+        execution:
+          steps:
+          - step:
+              identifier: Email4
+              name: Email-4
+              spec:
+                body: This is a test mail
+                cc: ''
+                subject: 'Job Status Notification: Success'
+                to: deepakraghavanb@virtusa.com
+              timeout: 1d
+              type: Email
+      tags: {}
+      type: Custom
+  tags: {}
